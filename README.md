@@ -1,13 +1,16 @@
 # μPrintGen
 
-<img 
-    style="display: block; 
-           margin-left: auto;
-           margin-right: auto;
-           width: 80%;"
-    src="./Thumbnail.svg" 
-    alt="Our logo">
-</img>
+<div style="text-align: center;">
+  <img 
+      style="
+            display: block;
+            margin-left: auto;
+            margin-right: auto;
+            width: 50%;
+            "
+      src="https://user-images.githubusercontent.com/30818940/206975537-288bc7c3-2684-4326-ac96-060124aed69c.svg"
+      alt="Thumbnail"/>
+</div>
 
 Creates a microprint representation of text or a text file, with rules set by a configuration file. These rules highlight rows with different background and text colors depending on the rules added.
 
@@ -56,7 +59,7 @@ svg.render_microprint()
 The generator accepts a JSON configuration file with a set of settings that it can change, those settings and their default values are as follows
 (comments added for explanation purposes, not valid JSON):
 
-For a valid example [click here](config.json)
+For a valid example [click here](https://github.com/AlphaSteam/uPrintGen/blob/0413461ea1bb4eac68f7cf75bbfbe93367372c64/config.json)
 
 ```
 {
