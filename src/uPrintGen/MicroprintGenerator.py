@@ -98,12 +98,12 @@ class MicroprintGenerator(ABC):
     @classmethod
     def from_text_file(cls, output_filename="microprint.svg", config_file_path="config.json", file_path=""):
         try:
-            _file = open(file_path)
+            text_file = open(file_path)
         except OSError as _:
             exit(f"Couldn't open text file '{file_path}'. Aborting execution.")
         else:
-            with file:
-                text = file.read()
+            with text_file:
+                text = text_file.read()
 
                 return cls(output_filename=output_filename, config_file_path=config_file_path, text=text)
 

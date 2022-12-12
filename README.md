@@ -7,10 +7,12 @@
             margin-left: auto;
             margin-right: auto;
             width: 50%;
-            "
-      src="https://user-images.githubusercontent.com/30818940/206975537-288bc7c3-2684-4326-ac96-060124aed69c.svg"
-      alt="Thumbnail"/>
+      
+            "src="https://user-images.githubusercontent.com/30818940/206975537-288bc7c3-2684-4326-ac96-060124aed69c.svg"
+      alt="Thumbnail"
+      />
 </div>
+
 Creates a microprint representation of text or a text file, with rules set by a configuration file. These rules highlight rows with different background and text colors depending on the rules added.
 
 ## Usage
