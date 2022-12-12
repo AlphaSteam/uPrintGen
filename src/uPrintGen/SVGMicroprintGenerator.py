@@ -30,12 +30,13 @@ class SVGMicroprintGenerator(MicroprintGenerator):
             self.drawing.embed_font(name, truetype_file)
 
     def __init__(self, output_filename="microprint.svg", config_file_path="config.json", text=""):
-        super().__init__(output_filename=output_filename, config_file_path=config_file_path, text=text)
+        super().__init__(output_filename=output_filename,
+                         config_file_path=config_file_path, text=text)
 
         self.drawing = svgwrite.Drawing(
             output_filename, (self.microprint_width, self.microprint_height), debug=False)
 
-        self.font_family = self.rules.get("font-family", "Sans")
+        self.font_family = self.rules.get("font-family", "monospace")
 
         self._load_svg_fonts()
 

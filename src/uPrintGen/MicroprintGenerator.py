@@ -19,11 +19,13 @@ class MicroprintGenerator(ABC):
         try:
             _file = open(config_file_path)
         except OSError as _:
-            logging.error(f"Couldn't open config file '{config_file_path}'. Using default parameters.")
+            logging.error(
+                f"Couldn't open config file '{config_file_path}'. Using default parameters.")
             self.rules = {}
         else:
             with _file:
-                logging.info(f"Configuration file '{config_file_path} loaded successfully")
+                logging.info(
+                    f"Configuration file '{config_file_path} loaded successfully")
                 rules = json.load(_file)
 
                 self.rules = rules
@@ -82,7 +84,8 @@ class MicroprintGenerator(ABC):
 
         self.column_gap_color = self.rules.get("column_gap_color", "white")
 
-        self.microprint_width = (self.column_width + self.column_gap_size) * self.number_of_columns
+        self.microprint_width = (
+            self.column_width + self.column_gap_size) * self.number_of_columns
 
         self.microprint_height = min(
             len(self.text_lines) * self.scale_with_spacing, self.max_microprint_height)
@@ -95,7 +98,7 @@ class MicroprintGenerator(ABC):
     @classmethod
     def from_text_file(cls, output_filename="microprint.svg", config_file_path="config.json", file_path=""):
         try:
-            file = open(file_path)
+            _file = open(file_path)
         except OSError as _:
             exit(f"Couldn't open text file '{file_path}'. Aborting execution.")
         else:
