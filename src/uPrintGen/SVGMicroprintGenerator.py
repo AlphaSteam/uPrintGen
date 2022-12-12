@@ -1,6 +1,8 @@
-from MicroprintGenerator import MicroprintGenerator
+import math
+from .MicroprintGenerator import MicroprintGenerator
 import svgwrite
 import logging
+from tqdm import tqdm
 
 
 class SVGMicroprintGenerator(MicroprintGenerator):
@@ -27,8 +29,8 @@ class SVGMicroprintGenerator(MicroprintGenerator):
 
             self.drawing.embed_font(name, truetype_file)
 
-    def __init__(self, output_filename="microprint.svg", text=""):
-        super().__init__(output_filename, text)
+    def __init__(self, output_filename="microprint.svg", config_file_path="config.json", text=""):
+        super().__init__(output_filename=output_filename, config_file_path=config_file_path, text=text)
 
         self.drawing = svgwrite.Drawing(
             output_filename, (self.microprint_width, self.microprint_height), debug=False)
@@ -38,7 +40,6 @@ class SVGMicroprintGenerator(MicroprintGenerator):
         self._load_svg_fonts()
 
     def render_microprint_column(self, first_line, last_line, x_with_gap, y, current_line):
-
         backgrounds = self.drawing.add(self.drawing.g())
 
         default_text_color = self.default_colors["text_color"]
@@ -51,7 +52,9 @@ class SVGMicroprintGenerator(MicroprintGenerator):
 
         texts.update(attributes)
 
-        for text_line in self.text_lines[first_line:last_line]:
+        text_lines = self.text_lines[first_line:last_line]
+
+        for text_line in tqdm(text_lines, total=len(text_lines), desc="Generating rows"):
             background_color = self.check_color_line_rule(
                 color_type="background_color", text_line=text_line)
 
@@ -86,7 +89,7 @@ class SVGMicroprintGenerator(MicroprintGenerator):
 
         current_line = 0
 
-        for column in range(self.number_of_columns):
+        for column in tqdm(range(self.number_of_columns), total=self.number_of_columns, desc="Generating columns"):
             x = math.ceil(column * self.column_width)
             x_with_gap = x if column == 0 else x + self.column_gap_size
 
@@ -113,3 +116,5 @@ class SVGMicroprintGenerator(MicroprintGenerator):
             current_line += self.text_lines_per_column
 
         self.drawing.save()
+
+        logging.info(f"Microprint saved as '{self.output_filename}'")

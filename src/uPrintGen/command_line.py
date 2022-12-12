@@ -1,5 +1,8 @@
+#!/usr/bin/python
+# -*- coding: utf-8 -*-
+
 import argparse
-from SVGMicroprintGenerator import SVGMicroprintGenerator
+from .SVGMicroprintGenerator import SVGMicroprintGenerator
 
 
 def main():
@@ -7,11 +10,17 @@ def main():
                                      description='Microprint generator')
 
     parser.add_argument('-o', '--output_filename', dest='output_filename',
-                        help='Output filename for the generated microprint')
+                        help='Output filename for the generated microprint',
+                        default="Microprint.svg"
+                        )
     parser.add_argument('-c',  '--config_file_path',
                         dest='config_file_path',
-                        help="Config file path for the .json file containing the configurations of the generated microprint.")
+                        help="Config file path for the .json file containing the configurations of the generated "
+                             "microprint.",
+                        default="config.json"
+                        )
     parser.add_argument('-i',  '--file_input',
+                        required=True,
                         dest='file_input',
                         help="File path for the input text to generate the microprint.")
 

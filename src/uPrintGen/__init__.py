@@ -1,2 +1,1 @@
-from SVGMicroprintGenerator import SVGMicroprintGenerator
-from RasterMicroprintGenerator import RasterMicroprintGenerator
+from .SVGMicroprintGenerator import SVGMicroprintGenerator

@@ -1,20 +1,29 @@
 import json
+import logging
 from abc import ABC, abstractmethod
 import math
+from sys import exit
 import re
 
 
-class MicroprintGenerator(ABC):
+def remove_ansi_escape_sequences(text):
+    ansi_escape = re.compile(r'\x1B(?:[@-Z\\-_]|\[[0-?]*[ -/]*[@-~])')
 
+    return ansi_escape.sub('', text)
+
+
+class MicroprintGenerator(ABC):
     def _load_config_file(self):
         config_file_path = self.config_file_path
 
         try:
             _file = open(config_file_path)
         except OSError as _:
+            logging.error(f"Couldn't open config file '{config_file_path}'. Using default parameters.")
             self.rules = {}
         else:
             with _file:
+                logging.info(f"Configuration file '{config_file_path} loaded successfully")
                 rules = json.load(_file)
 
                 self.rules = rules
@@ -34,9 +43,11 @@ class MicroprintGenerator(ABC):
 
     def __init__(self, output_filename, config_file_path, text):
 
+        logging.getLogger().setLevel(logging.INFO)
+
         self.output_filename = output_filename
 
-        self.text_lines = text.split('\n')
+        self.text_lines = remove_ansi_escape_sequences(text).split('\n')
 
         self.config_file_path = config_file_path
 
@@ -71,8 +82,7 @@ class MicroprintGenerator(ABC):
 
         self.column_gap_color = self.rules.get("column_gap_color", "white")
 
-        self.microprint_width = (
-            self.column_width + self.column_gap_size) * self.number_of_columns
+        self.microprint_width = (self.column_width + self.column_gap_size) * self.number_of_columns
 
         self.microprint_height = min(
             len(self.text_lines) * self.scale_with_spacing, self.max_microprint_height)
@@ -84,10 +94,15 @@ class MicroprintGenerator(ABC):
 
     @classmethod
     def from_text_file(cls, output_filename, config_file_path, file_path):
-        with open(file_path) as file:
-            text = file.read()
+        try:
+            file = open(file_path)
+        except OSError as _:
+            exit(f"Couldn't open text file '{file_path}'. Aborting execution.")
+        else:
+            with file:
+                text = file.read()
 
-            return cls(output_filename, config_file_path, text)
+                return cls(output_filename=output_filename, config_file_path=config_file_path, text=text)
 
     def check_color_line_rule(self, color_type, text_line):
         text_line = text_line.lower()
