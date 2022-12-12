@@ -6,9 +6,8 @@
             display: block;
             margin-left: auto;
             margin-right: auto;
-            width: 50%;
-      
-            "src="https://user-images.githubusercontent.com/30818940/206975537-288bc7c3-2684-4326-ac96-060124aed69c.svg"
+            width: 50%;"
+      src="https://user-images.githubusercontent.com/30818940/206975537-288bc7c3-2684-4326-ac96-060124aed69c.svg"
       alt="Thumbnail"
       />
 </div>
