@@ -9,20 +9,22 @@ def main():
     parser = argparse.ArgumentParser(prog='μPrintGen',
                                      description='Microprint generator')
 
-    parser.add_argument('-o', '--output_filename', dest='output_filename',
-                        help='Output filename for the generated microprint',
-                        default="Microprint.svg"
-                        )
-    parser.add_argument('-c',  '--config_file_path',
+    parser.add_argument('-i', '--file_input',
+                        required=True,
+                        dest='file_input',
+                        help="File path for the input text to generate the microprint.")
+    parser.add_argument('-c', '--config_file_path',
                         dest='config_file_path',
                         help="Config file path for the .json file containing the configurations of the generated "
                              "microprint.",
                         default="config.json"
                         )
-    parser.add_argument('-i',  '--file_input',
-                        required=True,
-                        dest='file_input',
-                        help="File path for the input text to generate the microprint.")
+    parser.add_argument('-o', '--output_filename', dest='output_filename',
+                        help='Output filename for the generated microprint',
+                        default="Microprint.svg"
+                        )
+
+
 
     args = parser.parse_args()
 

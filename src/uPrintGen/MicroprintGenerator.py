@@ -93,7 +93,7 @@ class MicroprintGenerator(ABC):
         self._set_default_colors()
 
     @classmethod
-    def from_text_file(cls, output_filename, config_file_path, file_path):
+    def from_text_file(cls, output_filename="microprint.svg", config_file_path="config.json", file_path=""):
         try:
             file = open(file_path)
         except OSError as _:
