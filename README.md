@@ -84,7 +84,7 @@ For a valid example [click here](https://github.com/AlphaSteam/uPrintGen/blob/04
   # Changes the number of columns to render.
   # If this parameter is set, "max_microprint_height" is not used.
   # The height of the microprint will be set automatically to fulfill the desired number of columns
-  # Default: Total log height. No limit
+  # Default: 1
   "number_of_columns": 4,
 
   # Changes the size of the gap between columns
