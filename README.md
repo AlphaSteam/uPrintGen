@@ -31,7 +31,7 @@ Installing the package through pip makes the command `generate_microprint` avail
 At the same time, the package can be imported from a Python program and used in two ways:
 #### From text_file
 ```
-from uPrintGen import SVGMicroprintGenerator
+from uprintgen import SVGMicroprintGenerator
 
 svg = SVGMicroprintGenerator.from_text_file(
     file_path="example.txt", config_file_path="config.json", output_filename="microprint.svg"
@@ -45,7 +45,7 @@ Which will save the microprint with the defined name and configuration file.
 #### From text
 
 ```
-from uPrintGen import SVGMicroprintGenerator
+from uprintgen import SVGMicroprintGenerator
 
 example= "blablablabla..."
 
@@ -57,107 +57,107 @@ svg.render_microprint()
 
 ### Configuration file
 The generator accepts a JSON configuration file with a set of settings that it can change, those settings and their default values are as follows
-(comments added for explanation purposes, not valid JSON):
 
-For a valid example [click here](https://github.com/AlphaSteam/uPrintGen/blob/0413461ea1bb4eac68f7cf75bbfbe93367372c64/config.json)
+#### Visual configurations
+| Rule        | Description| Default  |
+| ------------- |:-------------:| -----:|
+|`scale` | Changes the scale of the font in the generated microprint. | 1 |
+|`vertical_spacing`| Changes the vertical spacing between each row.|1|
+|`microprint_width`| Changes the width of the microprint (or each column if there's more than one). | 120|
+|`max_microprint_height`| Changes the max height of the microprint. If "number_of_columns" is set, this parameter is not used. The microprint will be divided in columns to fulfill the desired height.|  Total log height. No limit|
+|`number_of_columns`|Changes the number of columns to render. If this parameter is set, "max_microprint_height" is not used. The height of the microprint will be set automatically to fulfill the desired number of columns.|1|
+|`column_gap_size`| Changes the size of the gap between columns.|0.2|
+|`column_gap_color`|Changes the color of the gap between columns.|`white`|
+|`default_colors`|These define the default colors that are used in case no color  was defined for a certain rule. If this section is not present, both colors will be the default ones.| <ul><li style="white-space: nowrap"><span >Background color: `white`</span></li><li>Text color: `black`</li></ul>|
+|`font-family`|This sets the font-family of the svg. If the first font is not available or cannot be loaded in the system, the next one is going to be used. |`monospace`|
+
+
+#### Additional fonts (inside `additional_fonts`)
+
+This section contains fonts to be embedded to the svg.
+
+If the fonts work natively in the place where you want to see the svg, there's no need todo this. Monospace fonts recommended.
+
+It has two subsections. `google_fonts` and `truetype_fonts`.
+
+##### Google fonts (inside `google_fonts`)
+
+This sub-section contains fonts to be loaded from google fonts.
+
+| Rule        | Description| Default  |
+| ------------- |:-------------:| -----:|
+|`name` | The name to assign the embedded font. This name is the one that needs to be used when setting the font-family of the microprint.| Required |
+|`google_font_url`|The url from where to load the google font.|Required|
+
+
+##### TrueType fonts (inside `truetype_fonts`)
+
+This sub-section contains fonts to be loaded from the repo, as a TrueType font file.
+
+| Rule        | Description| Default  |
+| ------------- |:-------------:| -----:|
+|`name` | The name to assign the embedded font. This name is the one that needs to be used when setting the font-family of the microprint.| Required |
+|`truetype_file`|The path to the truetype font file. Includes the name of the file with the extension.|Required|
+
+
+#### Line rules (inside `line_rules`)
+
+This section contains all the rules for the colors of the microprint
+
+| Rule        | Description| Default  |
+| ------------- |:-------------:| -----:|
+|`includes` | If the row matches any of the rules inside this array, it uses this rule's colors. As long as no excludes match. Can be strings or regex.  | `[]`|
+|`excludes`|If the row matches any of the rules inside this array, the rule will not be used.|`[]`|
+|`text_color`|Text color the rule will use in case the rule is matched.|The default text color defined in the configuration file|
+|`background_color`|Background color the rule will use in case the rule is matched.|The default background color defined in the configuration file|
+#### Example
 
 ```
 {
-  # Changes the scale of the font in the generated microprint.
-  # Default: 1
   "scale": 2,
-
-  # Changes the vertical spacing between each row.
-  # Default: 1
   "vertical_spacing": 1.4,
-
-  # Changes the width of the microprint (or each column if there's more than one)
-  # Default: 120
   "microprint_width": 140,
-
-  # Changes the max height of the microprint
-  # If "number_of_columns" is set, this parameter is not used.
-  # The microprint will be divided in columns to fulfill the desired height.
-  # Default: Total log height. No limit
   "max_microprint_height": 300,
-
-  # Changes the number of columns to render.
-  # If this parameter is set, "max_microprint_height" is not used.
-  # The height of the microprint will be set automatically to fulfill the desired number of columns
-  # Default: 1
   "number_of_columns": 4,
-
-  # Changes the size of the gap between columns
-  # Default: 0.2
   "column_gap_size": 0.3,
-
-  # Changes the color of the gap between columns
-  # Default: "white"
   "column_gap_color": "red",
-
-  # These define the default colors that are used in case no color was defined for
-  # a certain rule. If this section is not present, both colors will be the
-  # default ones.
   "default_colors": {
-    # Default background color in case no background color is set
-    # Default: white
     "background_color": "rgb(30, 30, 30)",
-
-    # Default text color in case no background color is set
-    # Default: black
     "text_color": "white"
   },
-
-  # This section contains all the rules for the colors of the microprint
-  # Each key corresponds to the word it needs to have in a row to use those
-  # colors.
-  
-  # For example, if the key is "error" and the row contains the
-  # word "error", then the whole row will be colored with the rules inside the
-  # object
-
-  # If any of the two colors is not set (text or background), the default ones 
-  # are used.
-  "line_rules": {
-    "error": {
+  "line_rules":  [
+    {
+      "includes": [
+        "(?:^|\\W)error(?:$|\\W)(?!code)",
+        "panicked",
+        "failed",
+        "stacktrace"
+      ],
+      "excludes": [
+        "checking",
+        "compiling",
+        "(?:^|\\W)0(?:$|\\W)",
+        "info"
+      ],
       "text_color": "red",
-      "background_color": "white"
+      "background_color": "#910404"
     },
-    "installing": {
+    {
+      "includes": [
+        "installing"
+      ],
       "text_color": "white",
       "background_color": "green"
     },
-    "command": {
-      "text_color": "purple"
-    },
-    "warning": {
+    {
+      "includes": [
+        "warning"
+      ],
       "text_color": "black",
       "background_color": "yellow"
-    },
-    "fetching": {
-      "text_color": "black",
-      "background_color": "orange"
-    },
-    "complete": {
-      "text_color": "green",
-      "background_color": "white"
     }
-  },
-  
-  # This section contains fonts to be embedded to the svg. If the fonts work
-  # natively in the place where you want to see the svg, there's no need to
-  # do this. Monospace fonts recommended.
-
+  ],
   "additional_fonts": {
-
-    # This sub-section contains fonts to be loaded from google fonts.
-
-    # "name" is the name to assign the embedded font. This name is the one that
-    # needs to be used when setting the font-family of the microprint.
-
-    # "google_font_url" is the url from where to load the google font.
-
-    # Both are required.
     "google_fonts": [
       {
         "name": "Anton",
@@ -168,17 +168,6 @@ For a valid example [click here](https://github.com/AlphaSteam/uPrintGen/blob/04
         "google_font_url": "https://fonts.googleapis.com/css?family=Acme"
       }
     ],
-
-    # This sub-section contains fonts to be loaded from the repo, as a truetype
-    # font file.
-
-    # "name" is the name to assign the embedded font. This name is the one that
-    # needs to be used when setting the font-family of the microprint
-
-    # "truetype_file" is the path to the truetype font file. Includes the name of
-    # the file with the extension.
-
-    # Both are required.
     "truetype_fonts": [
       {
         "name": "NotoSans",
@@ -186,11 +175,7 @@ For a valid example [click here](https://github.com/AlphaSteam/uPrintGen/blob/04
       }
     ]
   },
-
-  # This sets the font-family of the svg. If the first font is not available 
-  # or cannot be loaded in the system, the next one is going to be used. 
-
-  # Default: monospace
   "font-family": "Acme, Anton, NotoSans, Sans, Cursive"
 }
 ```
+
