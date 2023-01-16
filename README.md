@@ -125,8 +125,6 @@ This section contains all the rules for the colors of the microprint
     "background_color": "rgb(30, 30, 30)",
     "text_color": "white"
   },
-
-  # 
   "line_rules":  [
     {
       "includes": [
@@ -159,7 +157,6 @@ This section contains all the rules for the colors of the microprint
       "background_color": "yellow"
     }
   ],
-
   "additional_fonts": {
     "google_fonts": [
       {
@@ -171,7 +168,6 @@ This section contains all the rules for the colors of the microprint
         "google_font_url": "https://fonts.googleapis.com/css?family=Acme"
       }
     ],
-
     "truetype_fonts": [
       {
         "name": "NotoSans",
