@@ -18,6 +18,22 @@ def remove_ansi_escape_sequences(text):
     return ansi_escape.sub('', text)
 
 
+def rule_match(rule, text_line):
+    """
+       Checks if the text line matches the rule
+    """
+    try:
+        pattern = re.compile(rule, re.IGNORECASE)
+        if re.search(pattern, text_line):
+            return True
+        return False
+
+    except re.error:
+        if text_line.find(rule) != -1:
+            return True
+        return False
+
+
 class MicroprintGenerator(ABC):
     """
         Base implementation of microprint generator
@@ -129,19 +145,27 @@ class MicroprintGenerator(ABC):
         """
         text_line = text_line.lower()
 
-        line_rules = self.rules.get("line_rules", {})
+        line_rules = self.rules.get("line_rules", [])
 
         default_color = self.default_colors[color_type]
 
         for rule in line_rules:
-            try:
-                pattern = re.compile(rule, re.IGNORECASE)
-                if re.search(pattern, text_line):
-                    return line_rules[rule].get(color_type, default_color)
+            includes = rule.get("includes", [])
+            excludes = rule.get("excludes", [])
 
-            except re.error:
-                if text_line.find(rule) != -1:
-                    return line_rules[rule].get(color_type, default_color)
+            skip_rule = False
+
+            for exclude in excludes:
+                if rule_match(exclude, text_line):
+                    skip_rule = True
+                    break
+
+            if skip_rule:
+                continue
+
+            for include in includes:
+                if rule_match(include, text_line):
+                    return rule.get(color_type, default_color)
 
         return default_color
 
