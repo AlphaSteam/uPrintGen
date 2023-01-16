@@ -1,14 +1,21 @@
+"""Module for svg microprint generation"""
+
 import math
-from .MicroprintGenerator import MicroprintGenerator
-import svgwrite
 import logging
 from tqdm import tqdm
+import svgwrite
+from .microprint_generator import MicroprintGenerator
 
 
 class SVGMicroprintGenerator(MicroprintGenerator):
+    """
+    Microprint generator implementation that generates svg microprints
+    """
 
     def _load_svg_fonts(self):
-
+        """
+        Embeds fonts into svg
+        """
         additional_fonts = self.rules.get("additional_fonts",
                                           {"google_fonts": [],
                                            "truetype_fonts": []})
@@ -17,13 +24,13 @@ class SVGMicroprintGenerator(MicroprintGenerator):
 
         truetype_fonts = additional_fonts.get("truetype_fonts", [])
 
-        for count, google_font in enumerate(google_fonts):
+        for _count, google_font in enumerate(google_fonts):
             name = google_font["name"]
             url = google_font["google_font_url"]
 
             self.drawing.embed_google_web_font(name, url)
 
-        for count, truetype_font in enumerate(truetype_fonts):
+        for _count, truetype_font in enumerate(truetype_fonts):
             name = truetype_font["name"]
             truetype_file = truetype_font["truetype_file"]
 
@@ -40,7 +47,10 @@ class SVGMicroprintGenerator(MicroprintGenerator):
 
         self._load_svg_fonts()
 
-    def render_microprint_column(self, first_line, last_line, x_with_gap, y, current_line):
+    def render_microprint_column(self, first_line, last_line, x_with_gap, y_value, current_line):
+        """
+        Renders one column of the microprint
+        """
         backgrounds = self.drawing.add(self.drawing.g())
 
         default_text_color = self.default_colors["text_color"]
@@ -59,7 +69,7 @@ class SVGMicroprintGenerator(MicroprintGenerator):
             background_color = self.check_color_line_rule(
                 color_type="background_color", text_line=text_line)
 
-            background_rect = self.drawing.rect(insert=(x_with_gap, y),
+            background_rect = self.drawing.rect(insert=(x_with_gap, y_value),
                                                 size=(self.column_width,
                                                       self.scale + 0.3),
                                                 rx=None, ry=None, fill=background_color)
@@ -67,7 +77,7 @@ class SVGMicroprintGenerator(MicroprintGenerator):
             text_color = self.check_color_line_rule(
                 color_type="text_color", text_line=text_line)
 
-            text = self.drawing.text(text_line, insert=(x_with_gap, y),
+            text = self.drawing.text(text_line, insert=(x_with_gap, y_value),
                                      fill=text_color, dominant_baseline="hanging")
 
             text.update({"data-text-line": current_line})
@@ -76,7 +86,7 @@ class SVGMicroprintGenerator(MicroprintGenerator):
             backgrounds.add(background_rect)
             texts.add(text)
 
-            y += self.scale_with_spacing
+            y_value += self.scale_with_spacing
 
             current_line += 1
 
@@ -90,18 +100,21 @@ class SVGMicroprintGenerator(MicroprintGenerator):
 
         current_line = 0
 
-        for column in tqdm(range(self.number_of_columns), total=self.number_of_columns, desc="Generating columns"):
-            x = math.ceil(column * self.column_width)
-            x_with_gap = x if column == 0 else x + self.column_gap_size
+        for column in tqdm(range(self.number_of_columns),
+                           total=self.number_of_columns, desc="Generating columns"):
+            x_value = math.ceil(column * self.column_width)
+            x_with_gap = x_value if column == 0 else x_value + self.column_gap_size
 
-            self.drawing.add(self.drawing.rect(insert=(x_with_gap, 0), size=(self.column_width, '100%'),
-                                               rx=None, ry=None, fill=default_background_color))
+            self.drawing.add(self.drawing.rect(
+                insert=(x_with_gap, 0), size=(self.column_width, '100%'),
+                rx=None, ry=None, fill=default_background_color))
 
             if column != 0:
-                self.drawing.add(self.drawing.rect(insert=(x, 0), size=(self.column_gap_size, '100%'),
-                                                   rx=None, ry=None, fill=self.column_gap_color))
+                self.drawing.add(self.drawing.rect(
+                    insert=(x_value, 0), size=(self.column_gap_size, '100%'),
+                    rx=None, ry=None, fill=self.column_gap_color))
 
-            y = 0
+            y_value = 0
 
             first_line = math.ceil(column * self.text_lines_per_column)
 
@@ -112,10 +125,12 @@ class SVGMicroprintGenerator(MicroprintGenerator):
                 break
 
             self.render_microprint_column(
-                first_line=first_line, last_line=last_line, x_with_gap=x_with_gap, y=y, current_line=current_line)
+                first_line=first_line,
+                last_line=last_line, x_with_gap=x_with_gap,
+                y_value=y_value, current_line=current_line)
 
             current_line += self.text_lines_per_column
 
         self.drawing.save()
 
-        logging.info(f"Microprint saved as '{self.output_filename}'")
+        logging.info("Microprint saved as '%s'", self.output_filename)
