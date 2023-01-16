@@ -1,31 +1,57 @@
+"""
+        Module with base implementation of microprint generator
+"""
 import json
 import logging
 from abc import ABC, abstractmethod
 import math
-from sys import exit
 import re
+import sys
 
 
 def remove_ansi_escape_sequences(text):
+    """
+        Removes ANSI escape sequences from text
+    """
     ansi_escape = re.compile(r'\x1B(?:[@-Z\\-_]|\[[0-?]*[ -/]*[@-~])')
 
     return ansi_escape.sub('', text)
 
 
+def rule_match(rule, text_line):
+    """
+       Checks if the text line matches the rule
+    """
+    try:
+        pattern = re.compile(rule, re.IGNORECASE)
+        if re.search(pattern, text_line):
+            return True
+        return False
+
+    except re.error:
+        if text_line.find(rule) != -1:
+            return True
+        return False
+
+
 class MicroprintGenerator(ABC):
+    """
+        Base implementation of microprint generator
+    """
+
     def _load_config_file(self):
         config_file_path = self.config_file_path
 
         try:
-            _file = open(config_file_path)
+            _file = open(config_file_path, encoding="utf-8")
         except OSError as _:
             logging.error(
-                f"Couldn't open config file '{config_file_path}'. Using default parameters.")
+                "Couldn't open config file '%s'. Using default parameters.", config_file_path)
             self.rules = {}
         else:
             with _file:
                 logging.info(
-                    f"Configuration file '{config_file_path} loaded successfully")
+                    "Configuration file '%s' loaded successfully", config_file_path)
                 rules = json.load(_file)
 
                 self.rules = rules
@@ -96,36 +122,55 @@ class MicroprintGenerator(ABC):
         self._set_default_colors()
 
     @classmethod
-    def from_text_file(cls, output_filename="microprint.svg", config_file_path="config.json", file_path=""):
+    def from_text_file(cls, output_filename="microprint.svg",
+                       config_file_path="config.json", file_path=""):
+        """
+        Generates a microprint from a text file
+        """
         try:
-            text_file = open(file_path)
+            text_file = open(file_path, encoding="utf-8")
         except OSError as _:
-            exit(f"Couldn't open text file '{file_path}'. Aborting execution.")
+            sys.exit(
+                f"Couldn't open text file '{file_path}'. Aborting execution.")
         else:
             with text_file:
                 text = text_file.read()
 
-                return cls(output_filename=output_filename, config_file_path=config_file_path, text=text)
+                return cls(output_filename=output_filename,
+                           config_file_path=config_file_path, text=text)
 
     def check_color_line_rule(self, color_type, text_line):
+        """
+        Checks a line for a rule match and returns the corresponding color
+        """
         text_line = text_line.lower()
 
-        line_rules = self.rules.get("line_rules", {})
+        line_rules = self.rules.get("line_rules", [])
 
         default_color = self.default_colors[color_type]
 
         for rule in line_rules:
-            try:
-                pattern = re.compile(rule, re.IGNORECASE)
-                if re.search(pattern, text_line):
-                    return line_rules[rule].get(color_type, default_color)
+            includes = rule.get("includes", [])
+            excludes = rule.get("excludes", [])
 
-            except re.error:
-                if text_line.find(rule) != -1:
-                    return line_rules[rule].get(color_type, default_color)
+            skip_rule = False
+
+            for exclude in excludes:
+                if rule_match(exclude, text_line):
+                    skip_rule = True
+                    break
+
+            if skip_rule:
+                continue
+
+            for include in includes:
+                if rule_match(include, text_line):
+                    return rule.get(color_type, default_color)
 
         return default_color
 
     @abstractmethod
     def render_microprint(self):
-        pass
+        """
+        Renders the microprint
+        """
