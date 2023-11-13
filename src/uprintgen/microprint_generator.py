@@ -147,6 +147,11 @@ class MicroprintGenerator(ABC):
 
         line_rules = self.rules.get("line_rules", [])
 
+        if not (isinstance(line_rules, list) and all(isinstance(item, dict) for item in line_rules)):
+             logging.error("Line rules don't follow the correct syntax. Using default colors.")
+
+             line_rules = []
+
         default_color = self.default_colors[color_type]
 
         for rule in line_rules:
